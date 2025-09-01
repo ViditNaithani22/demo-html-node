@@ -4,13 +4,24 @@ const axios = require('axios');
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
     try{
         
-        const ip = axios.get('http://169.254.169.254/latest/meta-data/local-ipv4');
-        const name = axios.get('http://169.254.169.254/latest/meta-data/hostname');
+        const tokenResp = await axios.put(
+            'http://169.254.169.254/latest/api/token',
+            null,
+            { headers: { 'X-aws-ec2-metadata-token-ttl-seconds': '21600' } }
+        );
+        const token = tokenResp.data;
 
-        res.send(`EC2 private IP: ${ip.data}, EC2 name: ${name.data}`);
+        const ipResp = await axios.get('http://169.254.169.254/latest/meta-data/local-ipv4', {
+            headers: { 'X-aws-ec2-metadata-token': token }
+        });
+        const nameResp = await axios.get('http://169.254.169.254/latest/meta-data/hostname', {
+            headers: { 'X-aws-ec2-metadata-token': token }
+        });
+
+        res.send(`EC2 private IP: ${ipResp.data}, EC2 name: ${nameResp.data}`);
 
     }catch(err){
 
