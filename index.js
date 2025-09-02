@@ -32,6 +32,6 @@ app.get('/', async (req, res) => {
 });
 
 
-app.listen(80, () => {
+app.listen(80,"0.0.0.0",() => {
     console.log("Server is running");
 });
